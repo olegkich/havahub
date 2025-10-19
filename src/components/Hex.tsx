@@ -3,8 +3,8 @@ import * as React from "react";
 export interface IHexProps {}
 
 export function Hex(props: IHexProps) {
-  const size = 15;
-  const width = size * Math.sqrt(5);
+  const size = 18;
+  const width = size * 2 + 3;
   const height = size * 2;
 
   const normal_points = [
@@ -18,13 +18,15 @@ export function Hex(props: IHexProps) {
     .map((p) => p.join(","))
     .join(" ");
 
+  console.log(width, height);
+
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+    <svg width={width} height={height}>
       <polygon
         points={normal_points}
         fill="#6B7280"
         stroke="#374151"
-        strokeWidth="2"
+        strokeWidth="2px"
       />
     </svg>
   );

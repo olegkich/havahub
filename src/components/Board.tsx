@@ -14,24 +14,36 @@ export function Board(props: IBoardProps) {
       .map((_, i) => size * 2 - 1 - i),
   ];
 
+  console.log(rowCounts);
+
   const hexWidth = Math.sqrt(5) * 15;
 
+  const [currentPlayer, setCurrentPlayer] = React.useState<boolean>(true);
+
+  const handleTurn = () => {
+    setCurrentPlayer(!currentPlayer);
+  };
+
   return (
-    <div className="flex justify-center items-center gap-[0] pl-[50px] pr-[50px] bg-[#12182B] rounded-[12px]">
+    <div className="flex justify-center items-center pl-[50px] pr-[50px] bg-[#12182B] rounded-[12px]">
       {rowCounts.map((count, rowIndex) => (
         <div
           key={rowIndex}
-          className="flex flex-col items-center justify-center gap-[0px] m-0 p-0"
+          className="flex flex-col items-center justify-center m-0 p-0"
         >
           {[...Array(count)].map((_, i) => (
             <div
               key={i}
               // why???????
               style={{
-                marginLeft: -(hexWidth * 0.25),
+                marginLeft: -(hexWidth * 0.29),
               }}
             >
-              <Hex />
+              <Hex
+                currentPlayer={currentPlayer}
+                nextTurn={handleTurn}
+                index={i}
+              />
             </div>
           ))}
         </div>

@@ -1,6 +1,10 @@
 import * as React from "react";
 
-export interface IHexProps {}
+export interface IHexProps {
+  currentPlayer: boolean;
+  nextTurn: () => void;
+  index: number;
+}
 
 export function Hex(props: IHexProps) {
   const size = 18;
@@ -18,13 +22,29 @@ export function Hex(props: IHexProps) {
     .map((p) => p.join(","))
     .join(" ");
 
-  console.log(width, height);
+  const [tileColor, setTileColor] = React.useState("#6B7280");
+  const [occupied, setOccupied] = React.useState(false);
+
+  const handleMove = () => {
+    console.log(`clicked on: ${props.index}`);
+
+    if (occupied) return;
+
+    if (props.currentPlayer) {
+      setTileColor("#e4e73db7");
+    } else {
+      setTileColor("#a953eab5");
+    }
+
+    setOccupied(true);
+    props.nextTurn();
+  };
 
   return (
-    <svg width={width} height={height}>
+    <svg width={width} height={height} onClick={handleMove}>
       <polygon
         points={normal_points}
-        fill="#6B7280"
+        fill={tileColor}
         stroke="#374151"
         strokeWidth="2px"
       />

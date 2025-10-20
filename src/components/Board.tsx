@@ -1,25 +1,32 @@
-import * as React from "react";
+import { useRef, useState } from "react";
 import { Hex } from "./Hex";
+import { BoardLogic } from "../game/BoardLogic";
+import { HEX_COLOR, PLAYER_1_COLOR, PLAYER_2_COLOR } from "../const";
 
 export interface IBoardProps {}
 
 export function Board(props: IBoardProps) {
-  const size = 8;
+  const logicalBoardRef = useRef(new BoardLogic());
+  const logicalBoard = logicalBoardRef.current;
+
+  const boardSize = 8;
+
+  // todo: use proper calculated sizes
   const hexWidth = Math.sqrt(5) * 15;
 
   const rowCounts = [
-    ...Array(size - 1)
+    ...Array(boardSize - 1)
       .fill(0)
-      .map((_, i) => size + i),
-    ...Array(size)
+      .map((_, i) => boardSize + i),
+    ...Array(boardSize)
       .fill(0)
-      .map((_, i) => size * 2 - 1 - i),
+      .map((_, i) => boardSize * 2 - 1 - i),
   ];
 
   const axialCoordinates: [number, number][] = [];
 
-  for (let q = -size + 1; q < size; q++) {
-    const count = rowCounts[q + size - 1];
+  for (let q = -boardSize + 1; q < boardSize; q++) {
+    const count = rowCounts[q + boardSize - 1];
     const rStart = -Math.floor(count / 2);
     for (let i = 0; i < count; i++) {
       const r = rStart + i;
@@ -27,10 +34,12 @@ export function Board(props: IBoardProps) {
     }
   }
 
-  const [currentPlayer, setCurrentPlayer] = React.useState<boolean>(true);
+  const [updateCounter, setUpdateCounter] = useState(0);
 
-  const handleTurn = () => {
-    setCurrentPlayer(!currentPlayer);
+  const handleMove = (q: number, r: number) => {
+    console.log("called", q, r);
+    logicalBoard.move(q, r);
+    setUpdateCounter(updateCounter + 1);
   };
 
   return (
@@ -41,25 +50,28 @@ export function Board(props: IBoardProps) {
           className="flex flex-col items-center justify-center m-0 p-0"
         >
           {[...Array(count)].map((x, i) => {
-            const q = rowIndex - (size - 1);
+            const q = rowIndex - (boardSize - 1);
 
-            const rMin = Math.max(-size + 1, -q - size + 1);
+            const rMin = Math.max(-boardSize + 1, -q - boardSize + 1);
 
             const r = rMin + i;
+
+            logicalBoard.setInitialCoordinate(q, r);
+
+            let fill = HEX_COLOR;
+
+            if (logicalBoard.getHexOwner(q, r) == 1) fill = PLAYER_1_COLOR;
+            if (logicalBoard.getHexOwner(q, r) == 2) fill = PLAYER_2_COLOR;
 
             return (
               <div
                 key={i}
+                // todo: fix whatever is causing this nonsense
                 style={{
                   marginLeft: -(hexWidth * 0.3),
                 }}
               >
-                <Hex
-                  q={q}
-                  r={r}
-                  currentPlayer={currentPlayer}
-                  nextTurn={handleTurn}
-                />
+                <Hex q={q} r={r} handleMove={handleMove} fill={fill} />
               </div>
             );
           })}

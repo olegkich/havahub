@@ -3,11 +3,14 @@ import * as React from "react";
 export interface IHexProps {
   currentPlayer: boolean;
   nextTurn: () => void;
-  index: number;
+  q: number;
+  r: number;
 }
 
-export function Hex(props: IHexProps) {
-  const size = 18;
+export function Hex({ q, r, currentPlayer, nextTurn }: IHexProps) {
+  const size = 22;
+
+  // todo: use proper calculated sizes
   const width = size * 2 + 3;
   const height = size * 2;
 
@@ -26,18 +29,16 @@ export function Hex(props: IHexProps) {
   const [occupied, setOccupied] = React.useState(false);
 
   const handleMove = () => {
-    console.log(`clicked on: ${props.index}`);
-
     if (occupied) return;
 
-    if (props.currentPlayer) {
-      setTileColor("#e4e73db7");
+    if (currentPlayer) {
+      setTileColor("#fbff00dd");
     } else {
-      setTileColor("#a953eab5");
+      setTileColor("#9000ffd2");
     }
 
     setOccupied(true);
-    props.nextTurn();
+    nextTurn();
   };
 
   return (
@@ -48,6 +49,17 @@ export function Hex(props: IHexProps) {
         stroke="#374151"
         strokeWidth="2px"
       />
+      <text
+        x={width / 2}
+        y={height / 2}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill="black"
+        fontSize="10"
+        pointerEvents="none"
+      >
+        {`${q} ${r}`}
+      </text>
     </svg>
   );
 }

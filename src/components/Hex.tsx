@@ -32,18 +32,8 @@ export function Hex({ q, r, handleMove, fill }: IHexProps) {
         fill={fill}
         stroke="#374151"
         strokeWidth="2px"
+        style={{ cursor: "pointer" }}
       />
-      <text
-        x={width / 2}
-        y={height / 2}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill="black"
-        fontSize="10"
-        pointerEvents="none"
-      >
-        {`${q} ${r}`}
-      </text>
     </svg>
   );
 }

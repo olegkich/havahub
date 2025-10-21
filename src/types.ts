@@ -4,8 +4,8 @@ export type Owner = 0 | 1 | 2;
 export type PlayerToMove = 1 | 2;
 
 export interface HexState {
-  q: Number;
-  r: Number;
+  q: number;
+  r: number;
   owner: Owner;
 }
 

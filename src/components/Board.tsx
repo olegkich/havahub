@@ -1,15 +1,27 @@
 import { useRef, useState } from "react";
 import { Hex } from "./Hex";
 import { BoardLogic } from "../game/BoardLogic";
-import { HEX_COLOR, PLAYER_1_COLOR, PLAYER_2_COLOR } from "../const";
+import {
+  HEX_COLOR,
+  PLAYER_1_COLOR,
+  PLAYER_1_HOVER_COLOR,
+  PLAYER_2_COLOR,
+  PLAYER_2_HOVER_COLOR,
+} from "../const";
 
-export interface IBoardProps {}
+export interface IBoardProps {
+  boardSize: number;
+}
 
 export function Board(props: IBoardProps) {
-  const logicalBoardRef = useRef(new BoardLogic());
+  const boardSize = 8;
+
+  const logicalBoardRef = useRef(new BoardLogic(boardSize));
   const logicalBoard = logicalBoardRef.current;
 
-  const boardSize = 8;
+  const [winner, setWinner] = useState<number | null>(null);
+
+  const edges: [number, number][] = [];
 
   // todo: use proper calculated sizes
   const hexWidth = Math.sqrt(5) * 15;
@@ -37,13 +49,31 @@ export function Board(props: IBoardProps) {
   const [updateCounter, setUpdateCounter] = useState(0);
 
   const handleMove = (q: number, r: number) => {
-    console.log("called", q, r);
+    if (winner != null) return;
+
     logicalBoard.move(q, r);
+
+    if (logicalBoard.checkWin()) setWinner(logicalBoard.getPlayerToMove());
+
+    logicalBoard.nextTurn();
+
     setUpdateCounter(updateCounter + 1);
   };
 
   return (
     <div className="flex justify-center items-center pl-[50px] pr-[50px] bg-[#12182B] rounded-[12px]">
+      {winner != null && (
+        <div
+          // inline because tailwind doesn't support dynamic styles
+          className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white px-4 py-2 rounded"
+          style={{
+            backgroundColor: winner === 1 ? PLAYER_1_COLOR : PLAYER_2_COLOR,
+          }}
+        >
+          Player {winner} wins!
+        </div>
+      )}
+
       {rowCounts.map((count, rowIndex) => (
         <div
           key={rowIndex}
@@ -58,10 +88,13 @@ export function Board(props: IBoardProps) {
 
             logicalBoard.setInitialCoordinate(q, r);
 
+            const hexOwner = logicalBoard.getHexOwner(q, r);
+
             let fill = HEX_COLOR;
 
-            if (logicalBoard.getHexOwner(q, r) == 1) fill = PLAYER_1_COLOR;
-            if (logicalBoard.getHexOwner(q, r) == 2) fill = PLAYER_2_COLOR;
+            if (hexOwner == 1) fill = PLAYER_1_COLOR;
+
+            if (hexOwner == 2) fill = PLAYER_2_COLOR;
 
             return (
               <div

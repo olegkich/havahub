@@ -13,9 +13,7 @@ export interface IBoardProps {
   boardSize: number;
 }
 
-export function Board(props: IBoardProps) {
-  const boardSize = 8;
-
+export function Board({ boardSize }: IBoardProps) {
   const logicalBoardRef = useRef(new BoardLogic(boardSize));
   const logicalBoard = logicalBoardRef.current;
 

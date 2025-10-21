@@ -15,6 +15,7 @@ export function Button({ children, onClick, className = "" }: IButtonProps) {
         hover:bg-gray-700
         focus:outline-none focus:ring-0 active:outline-none active:ring-0
         cursor-pointer
+        m-3
         ${className}
       `}
     >

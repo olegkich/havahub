@@ -26,7 +26,20 @@ const GameRooms: Map<string, GameRoom> = new Map();
 
 // -- SOCKET EVENTS ---
 io.on("connection", (socket) => {
-  socket.on("create-room", (payload: CreateRoomPayload) => {});
+  socket.on("get-rooms", () => {
+    // Only include rooms which haven't started yet
+    const availableRooms = Array.from(GameRooms.values())
+      .filter((room) => !room.gameStarted)
+      .map((room) => ({ roomCode: room.roomCode, boardSize: room.boardSize }));
+
+    socket.emit("rooms-list", availableRooms);
+  });
+
+  socket.on("create-room", (payload: CreateRoomPayload) => {
+    const room = createRoom(payload.boardSize, socket.id);
+    GameRooms.set(room.roomCode, room);
+    io.to(room.players[0].socketId).emit("room-created");
+  });
 
   socket.on("join-room", (payload: JoinRoomPayload) => {
     const { roomCode } = payload;

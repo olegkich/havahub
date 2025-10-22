@@ -10,3 +10,10 @@ export interface HexState {
 }
 
 export type BoardState = Map<string, HexState>;
+
+export interface MovePayload {
+  q: number;
+  r: number;
+  player: 1 | 2;
+  nextTurn: 1 | 2;
+}

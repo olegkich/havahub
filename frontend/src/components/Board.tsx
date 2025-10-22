@@ -10,14 +10,21 @@ import {
 } from "../const";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../api/socket";
+import type { MovePayload } from "../types";
 
 export interface IBoardProps {
   boardSize: number;
   roomCode: string;
   playerNumber: 1 | 2;
+  local?: boolean;
 }
 
-export function Board({ boardSize, roomCode, playerNumber }: IBoardProps) {
+export function Board({
+  boardSize,
+  roomCode,
+  playerNumber,
+  local,
+}: IBoardProps) {
   const navigate = useNavigate();
 
   const logicalBoardRef = useRef(new BoardLogic(boardSize));
@@ -48,6 +55,7 @@ export function Board({ boardSize, roomCode, playerNumber }: IBoardProps) {
   const [updateCounter, setUpdateCounter] = useState(0);
 
   useEffect(() => {
+    if (local) return;
     // Listen for game-start event from server
     socket.on("game-start", (payload) => {
       console.log("Game started:", payload);
@@ -56,9 +64,16 @@ export function Board({ boardSize, roomCode, playerNumber }: IBoardProps) {
     });
 
     // Listen for move updates
-    socket.on("move-made", (payload) => {
+    socket.on("move-made", (payload: MovePayload) => {
       const { q, r, player, nextTurn } = payload;
-      logicalBoard.move(q, r); // apply move
+
+      logicalBoard.move(q, r);
+
+      if (logicalBoard.checkWin()) {
+        setWinner(player);
+        socket.emit("game-over", { roomCode, winner: player });
+        return;
+      }
       logicalBoard.nextTurn();
       setCurrentPlayer(nextTurn);
       setUpdateCounter((prev) => prev + 1);
@@ -70,15 +85,45 @@ export function Board({ boardSize, roomCode, playerNumber }: IBoardProps) {
       setWinner(payload.winner);
     });
 
+    const handlePlayerDisconnected = (payload: { message: string }) => {
+      console.log(payload.message);
+      alert("Opponent disconnected. Returning to menu...");
+      navigate("/");
+    };
+
+    socket.on("player-disconnected", handlePlayerDisconnected);
+
     return () => {
       socket.off("game-start");
       socket.off("move-made");
       socket.off("game-over");
+      socket.off("player-disconnected");
     };
   }, []);
 
   const handleMove = (q: number, r: number) => {
     if (winner != null) return;
+
+    console.log(local);
+
+    if (local) {
+      logicalBoard.move(q, r);
+
+      if (logicalBoard.checkWin()) {
+        setWinner(currentPlayer);
+        return;
+      }
+
+      logicalBoard.nextTurn();
+      setUpdateCounter((prev) => prev + 1);
+
+      const next = logicalBoard.player;
+      if (next === 1 || next === 2) {
+        setCurrentPlayer(next);
+      }
+
+      return;
+    }
 
     socket.emit("make-move", {
       roomCode,
@@ -146,6 +191,7 @@ export function Board({ boardSize, roomCode, playerNumber }: IBoardProps) {
                   owner={hexOwner} // owner of this hex
                   currentPlayer={currentPlayer} // whose turn it is
                   playerNumber={playerNumber}
+                  local={local}
                 />
               </div>
             );

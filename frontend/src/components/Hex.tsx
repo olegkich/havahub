@@ -10,6 +10,7 @@ export interface IHexProps {
   owner: Owner;
   currentPlayer: 1 | 2; // whose turn it is
   playerNumber: 1 | 2;
+  local?: boolean;
 }
 
 export function Hex({
@@ -20,6 +21,7 @@ export function Hex({
   owner,
   currentPlayer,
   playerNumber,
+  local,
 }: IHexProps) {
   const [isHovered, setIsHovered] = useState(false);
   const size = 22;
@@ -38,11 +40,15 @@ export function Hex({
     .map((p) => p.join(","))
     .join(" ");
 
-  // Compute fill based on hover and owner
   let displayFill = fill;
-  if (owner === 0 && isHovered && currentPlayer === playerNumber) {
-    displayFill =
-      playerNumber === 1 ? PLAYER_1_HOVER_COLOR : PLAYER_2_HOVER_COLOR;
+  if (owner === 0 && isHovered) {
+    if (local) {
+      displayFill =
+        currentPlayer === 1 ? PLAYER_1_HOVER_COLOR : PLAYER_2_HOVER_COLOR;
+    } else if (currentPlayer === playerNumber) {
+      displayFill =
+        playerNumber === 1 ? PLAYER_1_HOVER_COLOR : PLAYER_2_HOVER_COLOR;
+    }
   }
 
   return (

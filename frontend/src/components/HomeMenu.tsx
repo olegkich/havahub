@@ -59,16 +59,15 @@ export function HomeMenu() {
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-gray-900 text-white p-6">
       <div className="flex flex-row gap-12">
-        {/* Board Selection */}
-        <div className="flex flex-col">
-          <h1 className="text-4xl font-bold mb-2">Create Game</h1>
+        <div className="flex flex-col items-center">
+          <h1 className="text-4xl font-bold mb-2">Play Havannah</h1>
           <p className="text-gray-400 mb-8">Select your preferred board size</p>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
             {[3, 4, 6, 8].map((size) => (
               <Button
                 key={size}
-                className={`bg-gray-800 hover:bg-gray-700 transition-colors rounded-2xl py-3 px-6 text-lg ${
+                className={`bg-gray-800 hover:bg-gray-700 transition-colors rounded-2xl py-3 px-10 text-lg ${
                   boardSize === size ? "border-2 border-yellow-500" : ""
                 }`}
                 onClick={() => setBoardSize(size)}
@@ -78,12 +77,29 @@ export function HomeMenu() {
             ))}
           </div>
 
-          <Button
-            className="bg-green-600 hover:bg-green-500 transition-colors rounded-2xl py-3 px-6 text-lg"
-            onClick={handlePlay}
-          >
-            Create Room
-          </Button>
+          <div>
+            <Button
+              className="bg-green-600 hover:bg-green-500 transition-colors rounded-2xl py-3 px-6 text-lg"
+              onClick={handlePlay}
+            >
+              Create Room
+            </Button>
+            <Button
+              className="bg-blue-600 hover:bg-blue-500 transition-colors rounded-2xl py-3 px-6 text-lg"
+              onClick={() =>
+                navigate("/game", {
+                  state: {
+                    boardSize,
+                    roomCode: null,
+                    playerNumber: 1,
+                    local: true,
+                  },
+                })
+              }
+            >
+              Play Locally
+            </Button>
+          </div>
         </div>
 
         {/* Available Rooms */}

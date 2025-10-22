@@ -6,10 +6,11 @@ export interface IGameProps {}
 
 export function Game(props: IGameProps) {
   const location = useLocation();
-  const { boardSize, roomCode, playerNumber } = location.state as {
+  const { boardSize, roomCode, playerNumber, local } = location.state as {
     boardSize: number;
     roomCode: string;
     playerNumber: 1 | 2;
+    local?: boolean;
   };
 
   return (
@@ -18,6 +19,7 @@ export function Game(props: IGameProps) {
         boardSize={boardSize}
         roomCode={roomCode}
         playerNumber={playerNumber}
+        local={local}
       />
     </div>
   );

@@ -55,7 +55,7 @@ export interface ErrorPayload {
 }
 
 export interface Player {
-  id: string;
+  // id: string;
   playerNumber: 1 | 2;
   socketId: string;
 }

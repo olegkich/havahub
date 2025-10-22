@@ -1,4 +1,4 @@
-import type { BoardState, Owner, PlayerToMove } from "../types";
+import type { BoardState, Owner } from "../types";
 
 // (q, r) -> Hex
 

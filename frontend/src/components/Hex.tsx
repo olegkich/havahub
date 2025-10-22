@@ -1,38 +1,77 @@
 import { useState } from "react";
+import { PLAYER_1_HOVER_COLOR, PLAYER_2_HOVER_COLOR } from "../const";
+import type { Owner } from "../types";
 
 export interface IHexProps {
   handleMove: (q: number, r: number) => void;
   q: number;
   r: number;
   fill: string;
+  owner: Owner;
+  currentPlayer: 1 | 2; // whose turn it is
+  playerNumber: 1 | 2;
 }
 
-export function Hex({ q, r, handleMove, fill }: IHexProps) {
+export function Hex({
+  q,
+  r,
+  handleMove,
+  fill,
+  owner,
+  currentPlayer,
+  playerNumber,
+}: IHexProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const size = 22;
 
-  // todo: use proper calculated sizes
   const width = size * 2 + 3;
   const height = size * 2;
 
   const normal_points = [
-    [width / 4, 0], // top-left
-    [width - width / 4, 0], // top-right
-    [width, height / 2], // right-middle
-    [width - width / 4, height], // bottom-right
-    [width / 4, height], // bottom-left
-    [0, height / 2], // left-middle
+    [width / 4, 0],
+    [width - width / 4, 0],
+    [width, height / 2],
+    [width - width / 4, height],
+    [width / 4, height],
+    [0, height / 2],
   ]
     .map((p) => p.join(","))
     .join(" ");
 
+  // Compute fill based on hover and owner
+  let displayFill = fill;
+  if (owner === 0 && isHovered && currentPlayer === playerNumber) {
+    displayFill =
+      playerNumber === 1 ? PLAYER_1_HOVER_COLOR : PLAYER_2_HOVER_COLOR;
+  }
+
   return (
-    <svg width={width} height={height} onClick={() => handleMove(q, r)}>
+    <svg
+      width={width}
+      height={height}
+      onClick={() => owner === 0 && handleMove(q, r)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ cursor: owner === 0 ? "pointer" : "default" }}
+    >
+      <defs>
+        <radialGradient
+          id={`grad-${q}-${r}`}
+          cx="50%"
+          cy="50%"
+          r="50%"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor={displayFill} stopOpacity="1" />
+          <stop offset="100%" stopColor={displayFill} stopOpacity="0.65" />
+        </radialGradient>
+      </defs>
+
       <polygon
         points={normal_points}
-        fill={fill}
-        stroke="#374151"
+        fill={`url(#grad-${q}-${r})`}
+        stroke="#1f1f1fff"
         strokeWidth="2px"
-        style={{ cursor: "pointer" }}
       />
     </svg>
   );

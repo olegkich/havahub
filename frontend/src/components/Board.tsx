@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Hex } from "./Hex";
 import { BoardLogic } from "../game/BoardLogic";
 import {
@@ -8,14 +8,26 @@ import {
   PLAYER_2_COLOR,
   PLAYER_2_HOVER_COLOR,
 } from "../const";
+import { useNavigate } from "react-router-dom";
+import { socket } from "../api/socket";
 
 export interface IBoardProps {
   boardSize: number;
+  roomCode: string;
+  playerNumber: 1 | 2;
 }
 
-export function Board({ boardSize }: IBoardProps) {
+export function Board({ boardSize, roomCode, playerNumber }: IBoardProps) {
+  const navigate = useNavigate();
+
   const logicalBoardRef = useRef(new BoardLogic(boardSize));
   const logicalBoard = logicalBoardRef.current;
+
+  const [currentPlayer, setCurrentPlayer] = useState<1 | 2>(playerNumber);
+
+  useEffect(() => {
+    logicalBoard.player = playerNumber;
+  }, [playerNumber, logicalBoard]);
 
   const [winner, setWinner] = useState<number | null>(null);
 
@@ -33,33 +45,50 @@ export function Board({ boardSize }: IBoardProps) {
       .map((_, i) => boardSize * 2 - 1 - i),
   ];
 
-  const axialCoordinates: [number, number][] = [];
-
-  for (let q = -boardSize + 1; q < boardSize; q++) {
-    const count = rowCounts[q + boardSize - 1];
-    const rStart = -Math.floor(count / 2);
-    for (let i = 0; i < count; i++) {
-      const r = rStart + i;
-      axialCoordinates.push([q, r]);
-    }
-  }
-
   const [updateCounter, setUpdateCounter] = useState(0);
+
+  useEffect(() => {
+    // Listen for game-start event from server
+    socket.on("game-start", (payload) => {
+      console.log("Game started:", payload);
+      // Optionally sync board size and first turn from payload
+      logicalBoard.player = payload.currentTurn;
+    });
+
+    // Listen for move updates
+    socket.on("move-made", (payload) => {
+      const { q, r, player, nextTurn } = payload;
+      logicalBoard.move(q, r); // apply move
+      logicalBoard.nextTurn();
+      setCurrentPlayer(nextTurn);
+      setUpdateCounter((prev) => prev + 1);
+    });
+
+    // Listen for game-over
+    socket.on("game-over", (payload) => {
+      console.log("Game Over:", payload);
+      setWinner(payload.winner);
+    });
+
+    return () => {
+      socket.off("game-start");
+      socket.off("move-made");
+      socket.off("game-over");
+    };
+  }, []);
 
   const handleMove = (q: number, r: number) => {
     if (winner != null) return;
 
-    logicalBoard.move(q, r);
-
-    if (logicalBoard.checkWin()) setWinner(logicalBoard.getPlayerToMove());
-
-    logicalBoard.nextTurn();
-
-    setUpdateCounter(updateCounter + 1);
+    socket.emit("make-move", {
+      roomCode,
+      q,
+      r,
+    });
   };
 
   return (
-    <div className="flex justify-center items-center pl-[50px] pr-[50px] bg-[#12182B] rounded-[12px]">
+    <div className="flex justify-center items-center pt-[30px] pb-[30px] pl-[50px] pr-[50px] bg-[#12182B] rounded-[12px]">
       {winner != null && (
         <div
           // inline because tailwind doesn't support dynamic styles
@@ -71,6 +100,13 @@ export function Board({ boardSize }: IBoardProps) {
           Player {winner} wins!
         </div>
       )}
+
+      <button
+        className="absolute top-4 left-4 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded transition-colors"
+        onClick={() => navigate("/")}
+      >
+        Back to Menu
+      </button>
 
       {rowCounts.map((count, rowIndex) => (
         <div
@@ -86,13 +122,13 @@ export function Board({ boardSize }: IBoardProps) {
 
             logicalBoard.setInitialCoordinate(q, r);
 
-            const hexOwner = logicalBoard.getHexOwner(q, r);
+            const hexOwner = logicalBoard.getHexOwner(q, r)!;
 
             let fill = HEX_COLOR;
 
-            if (hexOwner == 1) fill = PLAYER_1_COLOR;
-
-            if (hexOwner == 2) fill = PLAYER_2_COLOR;
+            if (hexOwner === playerNumber) fill = PLAYER_1_COLOR;
+            if (hexOwner !== 0 && hexOwner !== playerNumber)
+              fill = PLAYER_2_COLOR;
 
             return (
               <div
@@ -102,7 +138,15 @@ export function Board({ boardSize }: IBoardProps) {
                   marginLeft: -(hexWidth * 0.3),
                 }}
               >
-                <Hex q={q} r={r} handleMove={handleMove} fill={fill} />
+                <Hex
+                  q={q}
+                  r={r}
+                  handleMove={handleMove}
+                  fill={fill}
+                  owner={hexOwner} // owner of this hex
+                  currentPlayer={currentPlayer} // whose turn it is
+                  playerNumber={playerNumber}
+                />
               </div>
             );
           })}

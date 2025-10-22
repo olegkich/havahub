@@ -38,7 +38,14 @@ io.on("connection", (socket) => {
   socket.on("create-room", (payload: CreateRoomPayload) => {
     const room = createRoom(payload.boardSize, socket.id);
     GameRooms.set(room.roomCode, room);
-    io.to(room.players[0].socketId).emit("room-created");
+
+    const roomCreatedPayload: RoomCreatedPayload = {
+      roomCode: room.roomCode,
+      playerNumber: 1, // the creator is always player 1
+      boardSize: room.boardSize,
+    };
+
+    io.to(room.players[0]!.socketId).emit("room-created", roomCreatedPayload);
   });
 
   socket.on("join-room", (payload: JoinRoomPayload) => {
@@ -65,14 +72,15 @@ io.on("connection", (socket) => {
 
     GameRooms.set(room.roomCode, room);
 
-    const startPayload: GameStartPayload = {
-      players: room.players,
-      boardSize: room.boardSize,
-      currentTurn: room.currentTurn,
-    };
-    room.players.forEach((player) =>
-      io.to(player.socketId).emit("game-start", startPayload)
-    );
+    room.players.forEach((player) => {
+      const playerPayload = {
+        boardSize: room.boardSize,
+        roomCode: room.roomCode,
+        currentTurn: room.currentTurn,
+        playerNumber: player.playerNumber,
+      };
+      io.to(player.socketId).emit("game-start", playerPayload);
+    });
   });
 
   socket.on("make-move", (payload: MakeMovePayload) => {
@@ -143,14 +151,14 @@ io.on("connection", (socket) => {
         const player = room.players[playerIndex];
 
         console.log(
-          `player ${player.playerNumber} disconnected from room ${roomCode}`
+          `player ${player!.playerNumber} disconnected from room ${roomCode}`
         );
 
         room.players.splice(playerIndex, 1);
 
         room.players.forEach((p) => {
           io.to(p.socketId).emit("player-disconnected", {
-            message: `player ${player.playerNumber} disconnected`,
+            message: `player ${player!.playerNumber} disconnected`,
           } as PlayerDisconnectedPayload);
         });
 

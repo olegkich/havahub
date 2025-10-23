@@ -82,21 +82,28 @@ export function HomeMenu() {
               Create Room
             </Button>
             <Button
-              className="bg-blue-600 hover:bg-blue-500 transition-colors rounded-2xl py-3 px-6 text-lg"
-              onClick={() =>
-                navigate("/game", {
-                  state: {
-                    boardSize,
-                    roomCode: null,
-                    playerNumber: 1,
-                    local: true,
-                  },
-                })
-              }
+              className="bg-yellow-600 hover:bg-yellow-500 transition-colors rounded-2xl py-3 px-6 text-lg"
+              onClick={() => navigate("/how-to-play")}
             >
-              Play Locally
+              How to play
             </Button>
           </div>
+
+          <Button
+            className="bg-blue-600 hover:bg-blue-500 transition-colors rounded-2xl py-3 px-6 text-lg"
+            onClick={() =>
+              navigate("/game", {
+                state: {
+                  boardSize,
+                  roomCode: null,
+                  playerNumber: 1,
+                  local: true,
+                },
+              })
+            }
+          >
+            Play Locally
+          </Button>
         </div>
 
         {/* Available Rooms */}

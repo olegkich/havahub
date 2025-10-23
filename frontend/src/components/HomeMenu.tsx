@@ -16,9 +16,8 @@ export function HomeMenu() {
     }) => {
       navigate("/game", {
         state: {
-          boardSize: payload.boardSize,
-          roomCode: payload.roomCode,
-          playerNumber: payload.playerNumber,
+          ...payload,
+          gameStarted: false, // only creator — waiting for player 2
         },
       });
     };
@@ -28,12 +27,10 @@ export function HomeMenu() {
       boardSize: number;
       playerNumber: 1 | 2;
     }) => {
-      // Navigate only if this client is part of the room
       navigate("/game", {
         state: {
-          boardSize: payload.boardSize,
-          roomCode: payload.roomCode,
-          playerNumber: payload.playerNumber,
+          ...payload,
+          gameStarted: true, // both players start
         },
       });
     };

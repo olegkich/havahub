@@ -132,8 +132,16 @@ export function Board({
     });
   };
 
+  const handleResign = () => {
+    if (local) return navigate("/");
+
+    socket.emit("resign", { roomCode }); // notify server first
+    navigate("/");
+    window.location.reload();
+  };
+
   return (
-    <div className="flex justify-center items-center pt-[30px] pb-[30px] pl-[50px] pr-[50px] bg-[#12182B] rounded-[12px]">
+    <div className="flex justify-center items-center pt-[30px] pb-[30px] pl-[50px] pr-[50px]  rounded-[12px]">
       {winner != null && (
         <div
           // inline because tailwind doesn't support dynamic styles
@@ -147,10 +155,10 @@ export function Board({
       )}
 
       <button
-        className="absolute top-4 left-4 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded transition-colors"
-        onClick={() => navigate("/")}
+        className="cursor-pointer absolute top-4 left-4 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded transition-colors"
+        onClick={handleResign}
       >
-        Back to Menu
+        Quit / Resign
       </button>
 
       {rowCounts.map((count, rowIndex) => (

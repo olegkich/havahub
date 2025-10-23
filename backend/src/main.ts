@@ -141,6 +141,30 @@ io.on("connection", (socket) => {
     );
   });
 
+  socket.on("resign", ({ roomCode }) => {
+    const room = GameRooms.get(roomCode);
+    if (!room) return;
+
+    const leavingPlayer = room.players.find((p) => p.socketId === socket.id);
+    if (!leavingPlayer) return;
+
+    room.players.forEach((p) => {
+      if (p.socketId !== socket.id) {
+        io.to(p.socketId).emit("player-disconnected", {
+          message: `Player ${leavingPlayer.playerNumber} resigned`,
+        });
+      }
+    });
+
+    // Remove player and delete room if empty
+    room.players = room.players.filter((p) => p.socketId !== socket.id);
+    if (room.players.length === 0) GameRooms.delete(roomCode);
+    else GameRooms.set(roomCode, room);
+
+    // Finally, disconnect socket safely
+    socket.disconnect(true);
+  });
+
   socket.on("disconnect", () => {
     for (const [roomCode, room] of GameRooms.entries()) {
       const playerIndex = room.players.findIndex(

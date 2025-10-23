@@ -13,23 +13,31 @@ interface IRoomListProps {
 export function RoomList({ onJoin }: IRoomListProps) {
   const [rooms, setRooms] = useState<Room[]>([]);
 
-  // Request rooms when component mounts
-  useEffect(() => {
+  const fetchRooms = () => {
     socket.emit("get-rooms");
+  };
 
-    socket.on("rooms-list", (rooms: Room[]) => {
+  useEffect(() => {
+    fetchRooms();
+
+    const handleRoomsList = (rooms: Room[]) => {
       setRooms(rooms);
-    });
+    };
+
+    socket.on("rooms-list", handleRoomsList);
 
     return () => {
-      socket.off("rooms-list");
+      socket.off("rooms-list", handleRoomsList);
     };
   }, []);
 
   return (
     <div className="mt-6">
       <h2 className="text-xl font-semibold mb-2">Available Rooms</h2>
-      {rooms.length === 0 && <p>No available rooms</p>}
+
+      {rooms.length === 0 && (
+        <small className="text-grey">No available rooms</small>
+      )}
       <ul>
         {rooms.map((room) => (
           <li
@@ -43,6 +51,13 @@ export function RoomList({ onJoin }: IRoomListProps) {
           </li>
         ))}
       </ul>
+
+      <button
+        className="mb-4 mt-10 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded"
+        onClick={fetchRooms}
+      >
+        Reload Rooms
+      </button>
     </div>
   );
 }

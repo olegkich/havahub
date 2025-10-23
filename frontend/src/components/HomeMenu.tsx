@@ -65,7 +65,7 @@ export function HomeMenu() {
               <Button
                 key={size}
                 className={`bg-gray-800 hover:bg-gray-700 transition-colors rounded-2xl py-3 px-10 text-lg ${
-                  boardSize === size ? "border-2 border-yellow-500" : ""
+                  boardSize === size ? "border-2 border-blue-800" : ""
                 }`}
                 onClick={() => setBoardSize(size)}
               >

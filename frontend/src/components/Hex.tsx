@@ -11,6 +11,7 @@ export interface IHexProps {
   currentPlayer: 1 | 2; // whose turn it is
   playerNumber: 1 | 2;
   local?: boolean;
+  isLastMove: boolean;
 }
 
 export function Hex({
@@ -22,6 +23,7 @@ export function Hex({
   currentPlayer,
   playerNumber,
   local,
+  isLastMove,
 }: IHexProps) {
   const [isHovered, setIsHovered] = useState(false);
   const size = 22;
@@ -51,6 +53,10 @@ export function Hex({
     }
   }
 
+  let stroke = "#1f1f1fff";
+
+  if (isLastMove) stroke = "#bebebeff";
+
   return (
     <svg
       width={width}
@@ -76,7 +82,7 @@ export function Hex({
       <polygon
         points={normal_points}
         fill={`url(#grad-${q}-${r})`}
-        stroke="#1f1f1fff"
+        stroke={stroke}
         strokeWidth="2px"
       />
     </svg>

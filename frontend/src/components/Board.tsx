@@ -37,8 +37,7 @@ export function Board({
   }, [playerNumber, logicalBoard]);
 
   const [winner, setWinner] = useState<number | null>(null);
-
-  const edges: [number, number][] = [];
+  const [lastMove, setLastMove] = useState<number[]>([]);
 
   // todo: use proper calculated sizes
   const hexWidth = Math.sqrt(5) * 15;
@@ -68,6 +67,8 @@ export function Board({
       const { q, r, player, nextTurn } = payload;
 
       logicalBoard.move(q, r);
+
+      setLastMove([q, r]);
 
       if (logicalBoard.checkWin()) {
         setWinner(player);
@@ -104,7 +105,7 @@ export function Board({
   const handleMove = (q: number, r: number) => {
     if (winner != null) return;
 
-    console.log(local);
+    setLastMove([q, r]);
 
     if (local) {
       logicalBoard.move(q, r);
@@ -200,6 +201,9 @@ export function Board({
                   currentPlayer={currentPlayer} // whose turn it is
                   playerNumber={playerNumber}
                   local={local}
+                  isLastMove={
+                    lastMove[0] == q && lastMove[1] == r && lastMove.length > 0
+                  }
                 />
               </div>
             );

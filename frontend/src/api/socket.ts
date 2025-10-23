@@ -1,3 +1,7 @@
 import { io } from "socket.io-client";
 
-export const socket = io("http://localhost:3000"); // adjust URL for production
+const API_URL = import.meta.env.PROD
+  ? "" // empty string → same origin
+  : "http://localhost:10000";
+
+export const socket = io(API_URL); // adjust URL for production

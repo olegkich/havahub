@@ -16,6 +16,7 @@ import {
 } from "./types";
 import { generateRoomCode } from "./util/generateRoomCode";
 import { createRoom } from "./util/createRoom";
+import path from "node:path";
 
 // --- SETUP ---
 const app = express();
@@ -198,6 +199,13 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("server running at http://localhost:3000");
+const PORT = process.env.PORT || 3001;
+
+// Serve React build
+app.use(express.static(path.join(__dirname, "../../frontend/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../frontend/build", "index.html"));
 });
+
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

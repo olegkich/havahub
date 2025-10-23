@@ -1,13 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Hex } from "./Hex";
 import { BoardLogic } from "../game/BoardLogic";
-import {
-  HEX_COLOR,
-  PLAYER_1_COLOR,
-  PLAYER_1_HOVER_COLOR,
-  PLAYER_2_COLOR,
-  PLAYER_2_HOVER_COLOR,
-} from "../const";
+import { HEX_COLOR, PLAYER_1_COLOR, PLAYER_2_COLOR } from "../const";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../api/socket";
 import type { MovePayload } from "../types";
@@ -51,7 +45,7 @@ export function Board({
       .map((_, i) => boardSize * 2 - 1 - i),
   ];
 
-  const [updateCounter, setUpdateCounter] = useState(0);
+  const [_, setUpdateCounter] = useState(0);
 
   useEffect(() => {
     if (local) return;
@@ -167,7 +161,7 @@ export function Board({
           key={rowIndex}
           className="flex flex-col items-center justify-center m-0 p-0"
         >
-          {[...Array(count)].map((x, i) => {
+          {[...Array(count)].map((_, i) => {
             const q = rowIndex - (boardSize - 1);
 
             const rMin = Math.max(-boardSize + 1, -q - boardSize + 1);

@@ -232,7 +232,7 @@ export class BoardLogic {
 
   checkRing(player: Owner): boolean {
     // Check all cells on the board
-    for (const [key, tile] of this.boardState) {
+    for (const [_, tile] of this.boardState) {
       if (tile.owner === 0 || tile.owner === this.getOpponent()) {
         // If this cell cannot escape, it's enclosed by a ring
         if (!this.canEmptyCellEscape(tile.q, tile.r, player)) {
